@@ -1,32 +1,27 @@
 const request = require("supertest");
-process.env.NODE_ENV === "test"
+process.env.NODE_ENV === "test";
 const app = require("../app");
 const db = require("../db");
-
+const { dropAndCreate } = require("../tableSeed");
 // before each test, clean out data
 beforeEach(async () => {
-
-    await db.query("DELETE FROM invoices");
-    await db.query("DELETE FROM companies");
-    await db.query(`INSERT INTO companies (code, name, description) VALUES ('apple', 'Apple', 'Maker of OSX.'),
-         ('ibm', 'IBM', 'Big blue.')`);
-})
+  await db.query(dropAndCreate);
+});
 
 afterAll(async () => {
-    await db.end()
-})
+  await db.end();
+});
 
 describe("GET /", function () {
-
-    test("Respond with an array of companies", async function () {
-      const response = await request(app).get("/companies");
-      expect(response.body).toEqual({
-        "companies": [
-          {code: "apple", name: "Apple"},
-          {code: "ibm", name: "IBM"},
-        ]
-      });
+  test("Respond with an array of companies", async function () {
+    const response = await request(app).get("/companies");
+    expect(response.body).toEqual({
+      companies: [
+        { code: "apple", name: "Apple Computer" },
+        { code: "ibm", name: "IBM" },
+      ],
     });
+  });
 });
 
 // describe("GET /apple", function () {
@@ -47,49 +42,41 @@ describe("GET /", function () {
 // });
 
 describe("POST /", function () {
-
   test("Add a new company", async function () {
     const response = await request(app)
-        .post("/companies")
-        .send({name: "Target", description: "Shopping"});
+      .post("/companies")
+      .send({ name: "Target", description: "Shopping" });
 
-    expect(response.body).toEqual(
-        {
-          "company": {
-            code: "target",
-            name: "Target",
-            description: "Shopping",
-          }
-        }
-    );
+    expect(response.body).toEqual({
+      company: {
+        code: "target",
+        name: "Target",
+        description: "Shopping",
+      },
+    });
   });
 });
 
 describe("PUT /", function () {
+  test("Update a company", async function () {
+    const response = await request(app)
+      .put("/companies/ibm")
+      .send({ name: "IbmNew", description: "IBM" });
 
-    test("Update a company", async function () {
-      const response = await request(app)
-          .put("/companies/ibm")
-          .send({name: "IbmNew", description: "IBM"});
-  
-      expect(response.body).toEqual(
-          {
-            "company": {
-              code: "ibm",
-              name: "IbmNew",
-              description: "IBM",
-            }
-          }
-      );
+    expect(response.body).toEqual({
+      company: {
+        code: "ibm",
+        name: "IbmNew",
+        description: "IBM",
+      },
     });
+  });
 });
 
 describe("DELETE /", function () {
-
   test("Deletes a company", async function () {
-    const response = await request(app)
-        .delete("/companies/ibm");
+    const response = await request(app).delete("/companies/ibm");
 
-    expect(response.body).toEqual({"status": "deleted"});
+    expect(response.body).toEqual({ status: "deleted" });
   });
 });

@@ -4,13 +4,14 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest -i",
     "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.0",
+    "jest": "^28.0.3",
     "pg": "^8.7.3",
     "slugify": "^1.6.5",
     "supertest": "^6.2.3"
